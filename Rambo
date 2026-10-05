@@ -1,0 +1,82 @@
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- GitHubのキーリストのURL
+local keyListUrl = "https://raw.githubusercontent.com/extagzen-pixel/key/refs/heads/main/keys.txt"
+-- あなたの本体スクリプト（rambo）のURL
+local mainScriptUrl = "https://raw.githubusercontent.com/extagzen-pixel/4h/refs/heads/main/rambo"
+
+-- ネットからキーリストを取得する関数
+local function getValidKeys()
+    local success, result = pcall(function()
+        return game:HttpGet(keyListUrl)
+    end)
+    if success then
+        return result
+    else
+        return ""
+    end
+end
+
+-- UIの作成
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PaidKeySystem"
+ScreenGui.Parent = CoreGui
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 320, 0, 160)
+Frame.Position = UDim2.new(0.5, -160, 0.5, -80)
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Frame.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "Enter Your Purchased Key"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 18
+Title.Parent = Frame
+
+local TextBox = Instance.new("TextBox")
+TextBox.Size = UDim2.new(0, 280, 0, 40)
+TextBox.Position = UDim2.new(0.5, -140, 0.35, 0)
+TextBox.PlaceholderText = "Paste your key here..."
+TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+TextBox.Parent = Frame
+
+local Button = Instance.new("TextButton")
+Button.Size = UDim2.new(0, 280, 0, 40)
+Button.Position = UDim2.new(0.5, -140, 0.68, 0)
+Button.Text = "Verify"
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+Button.Font = Enum.Font.SourceSansBold
+Button.TextSize = 16
+Button.Parent = Frame
+
+-- 認証ボタンが押されたとき
+Button.MouseButton1Click:Connect(function()
+    local inputKey = TextBox.Text
+    local validKeysText = getValidKeys()
+    
+    -- 入力されたキーがGitHub上のリストに含まれているかチェック
+    if inputKey ~= "" and string.find(validKeysText, inputKey) then
+        Button.Text = "Success!"
+        Button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        task.wait(0.5)
+        ScreenGui:Destroy()
+        
+        -- 正しければ本体のスクリプトをロード
+        loadstring(game:HttpGet(mainScriptUrl))()
+    else
+        Button.Text = "Invalid Key!"
+        Button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        task.wait(1.5)
+        Button.Text = "Verify"
+        Button.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    end
+end)
